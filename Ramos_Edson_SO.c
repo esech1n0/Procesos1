@@ -13,7 +13,7 @@ pid_t pid_hijo, pid_nieto;
 
 srand(time(NULL)); // Inicio de randoms
 
-printf("Soy el proceso Padre con PID %d.\n", getpid());
+printf("Soy el proceso Padre (Nivel 1) con PID %d.\n", getpid());
 for (num = 0; num < num_hijos ; num++) { //crea los 3 hijos
     pid_hijo = fork(); // Crea un nuevo proceso hijo
     if (pid_hijo < 0) { // Error en fork
@@ -21,7 +21,7 @@ for (num = 0; num < num_hijos ; num++) { //crea los 3 hijos
         exit(EXIT_FAILURE);
     }
     if(pid_hijo == 0){ //codigo del hijo, el fork retorna un 0 si existe un proceso hijo
-        printf("Soy el proceso HIJO con PID %d, mi padre es %d\n",getpid(),getppid());
+        printf("Soy el proceso HIJO (Nivel 2) con PID %d, mi padre es %d\n",getpid(),getppid());
         usleep((rand() % 500) * 1000); //espera tiempo, random time
 
         for(num = 0; num < 2; num++) { //crea los 2 nietos de cada hijo
@@ -33,7 +33,7 @@ for (num = 0; num < num_hijos ; num++) { //crea los 3 hijos
             }
 
             if(pid_nieto == 0){ //codigo de los nietos
-                printf("Soy el proceso Nieto con PID %d, mi padre es %d\n",getpid(),getppid());
+                printf("Soy el proceso Nieto (Nivel 3) con PID %d, mi padre es %d\n",getpid(),getppid());
                 usleep((rand() % 500) * 1000); //espera tiempo, random time
                 exit(0); //el nieto termina aqui
                 }
@@ -41,7 +41,7 @@ for (num = 0; num < num_hijos ; num++) { //crea los 3 hijos
             //el hijo espera a sus 2 hijos
             for (num = 0; num < 2; num++) {
                 pid_nieto = wait(NULL);
-                printf("Fin del proceso nieto con PID %d \n", pid_nieto);
+                printf("Fin del proceso nieto (Nivel 3) con PID %d \n", pid_nieto);
             }
             exit(0); //el hijo termina aqui
             }
@@ -50,10 +50,10 @@ for (num = 0; num < num_hijos ; num++) { //crea los 3 hijos
         //el padre esperar a todos los hijos
         for (num = 0; num < num_hijos; num++) {
             pid_hijo = wait(NULL);
-            printf("Fin del proceso hijo con PID %d\n",pid_hijo);
+            printf("Fin del proceso hijo (Nivel 2) con PID %d\n",pid_hijo);
         }
         // aquí el padre se elimina al final
-        printf("El proceso padre con PID %d eliminado \n", getpid());
+        printf("El proceso padre (Nivel 1) con PID %d eliminado \n", getpid());
         kill(getpid(), SIGKILL);
 
         return 0;
