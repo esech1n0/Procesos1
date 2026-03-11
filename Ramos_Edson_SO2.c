@@ -77,13 +77,10 @@ int main() {
                     // NIETO espera a 4 bisnietos
                     for (b = 0; b < 4; b++) {
                         pid_bisnieto = wait(NULL);
-                        printf("Fin del proceso BISNIETO con PID %d\n", pid_bisnieto);
+                        printf("Fin del proceso BISNIETO (Nivel 4) con PID %d\n", pid_bisnieto);
                         fflush(stdout);
+                        usleep((rand() % 500) * 1000);
                     }
-
-                    printf("Fin del proceso NIETO (Nivel 3) con PID %d\n", getpid());
-                    fflush(stdout);
-
                     kill(getpid(), SIGTERM);
                     exit(0);
                 }
@@ -92,13 +89,10 @@ int main() {
             // HIJO espera a 3 nietos
             for (n = 0; n < 3; n++) {
                 pid_nieto = wait(NULL);
-                printf("Fin del proceso NIETO con PID %d\n", pid_nieto);
+                printf("Fin del proceso NIETO (3) con PID %d\n", pid_nieto);
                 fflush(stdout);
+                usleep((rand() % 500) * 1000);
             }
-
-            printf("Fin del proceso HIJO (Nivel 2) con PID %d\n", getpid());
-            fflush(stdout);
-
             kill(getpid(), SIGTERM);
             exit(0);
         }
@@ -107,11 +101,12 @@ int main() {
     // PADRE espera a 2 hijos
     for (h = 0; h < 2; h++) {
         pid_hijo = wait(NULL);
-        printf("Fin del proceso HIJO con PID %d\n", pid_hijo);
+        printf("Fin del proceso HIJO (Nivel 2) con PID %d\n", pid_hijo);
         fflush(stdout);
+        usleep((rand() % 500) * 1000);
     }
 
-    printf("El proceso PADRE con PID %d eliminado\n", getpid());
+    printf("El proceso PADRE (Nivel 1) PID %d eliminado\n", getpid());
     printf(">>>>>>>>>> JERARQUÍA FINALIZADA <<<<<<<<<<\n");
 
     kill(getpid(), SIGKILL);
