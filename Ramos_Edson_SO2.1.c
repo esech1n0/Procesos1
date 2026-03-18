@@ -8,7 +8,9 @@
 int main() {
 
     int b, bb;
-    pid_t pid_hijo, pid_nieto, pid_bisnieto, pid_tataranieto, pid_chozno;
+    pid_t pid_hijo, pid_nieto;
+    pid_t bisnietos[3];
+    pid_t pid_tataranieto, tataratataranietos[2];
 
     srand(time(NULL));
 
@@ -16,7 +18,6 @@ int main() {
     printf("Soy el proceso PADRE (Nivel 0) con PID %d\n", getpid());
     fflush(stdout);
 
-    // HIJO
     pid_hijo = fork();
 
     if (pid_hijo == 0) {
@@ -25,7 +26,6 @@ int main() {
         printf("Soy el proceso HIJO (Nivel 1) con PID %d, mi padre es %d\n", getpid(), getppid());
         fflush(stdout);
 
-        // NIETO
         pid_nieto = fork();
 
         if (pid_nieto == 0) {
@@ -34,21 +34,18 @@ int main() {
             printf("Soy el proceso NIETO (Nivel 2) con PID %d, mi padre es %d\n", getpid(), getppid());
             fflush(stdout);
 
-            // 3 BISNIETOS
             for (b = 0; b < 3; b++) {
 
-                pid_bisnieto = fork();
+                bisnietos[b] = fork();
 
-                if (pid_bisnieto == 0) {
+                if (bisnietos[b] == 0) {
 
                     usleep((rand() % 500) * 1000);
                     printf("Soy el proceso BISNIETO (Nivel 3) con PID %d, mi padre es %d\n", getpid(), getppid());
                     fflush(stdout);
 
-                    // SOLO el primero crea más
                     if (b == 0) {
 
-                        // TATARANIETO
                         pid_tataranieto = fork();
 
                         if (pid_tataranieto == 0) {
@@ -57,58 +54,57 @@ int main() {
                             printf("Soy el proceso TATARANIETO (Nivel 4) con PID %d, mi padre es %d\n", getpid(), getppid());
                             fflush(stdout);
 
-                            // 2 CHOZNOS
                             for (bb = 0; bb < 2; bb++) {
 
-                                pid_chozno = fork();
+                                tataratataranietos[bb] = fork();
 
-                                if (pid_chozno == 0) {
+                                if (tataratataranietos[bb] == 0) {
 
                                     usleep((rand() % 500) * 1000);
-                                    printf("Soy el proceso CHOZNO (Nivel 5) con PID %d, mi padre es %d\n", getpid(), getppid());
+                                    printf("Soy el proceso TATARATATARANIETO (Nivel 5) con PID %d, mi padre es %d\n", getpid(), getppid());
                                     fflush(stdout);
-
-                                    exit(0); // mueren primero
+                                    exit(0);
                                 }
                             }
-
-                            // espera CHOZNOS
                             for (bb = 0; bb < 2; bb++) {
-                                pid_chozno = wait(NULL);
-                                printf("Fin del proceso CHOZNO (Nivel 5) con PID %d\n", pid_chozno);
+                                waitpid(tataratataranietos[bb], NULL, 0);
+                                printf("Fin del proceso TATARATATARANIETO (Nivel 5) con PID %d\n", tataratataranietos[bb]);
                                 fflush(stdout);
                             }
 
-                            exit(0); // luego TATARANIETO
+                            exit(0);
                         }
 
-                        wait(NULL);
+                        waitpid(pid_tataranieto, NULL, 0);
                         printf("Fin del proceso TATARANIETO (Nivel 4) con PID %d\n", pid_tataranieto);
                         fflush(stdout);
                     }
 
-                    exit(0); // luego BISNIETO
+                    exit(0);
                 }
             }
 
-            // espera BISNIETOS
-            for (b = 0; b < 3; b++) {
-                pid_bisnieto = wait(NULL);
-                printf("Fin del proceso BISNIETO (Nivel 3) con PID %d\n", pid_bisnieto);
+            waitpid(bisnietos[0], NULL, 0);
+            printf("Fin del proceso BISNIETO (Nivel 3) con PID %d\n", bisnietos[0]);
+            fflush(stdout);
+
+            for (b = 1; b < 3; b++) {
+                waitpid(bisnietos[b], NULL, 0);
+                printf("Fin del proceso BISNIETO (Nivel 3) con PID %d\n", bisnietos[b]);
                 fflush(stdout);
             }
 
-            exit(0); // luego NIETO
+            exit(0);
         }
 
-        wait(NULL);
+        waitpid(pid_nieto, NULL, 0);
         printf("Fin del proceso NIETO (Nivel 2) con PID %d\n", pid_nieto);
         fflush(stdout);
 
-        exit(0); // luego HIJO
+        exit(0);
     }
 
-    wait(NULL);
+    waitpid(pid_hijo, NULL, 0);
     printf("Fin del proceso HIJO (Nivel 1) con PID %d\n", pid_hijo);
     printf("Fin del proceso PADRE (Nivel 0) con PID %d\n", getpid());
     printf(">>>>>>>>>> JERARQUÍA FINALIZADA <<<<<<<<<<\n");
